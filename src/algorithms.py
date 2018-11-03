@@ -2,6 +2,7 @@ import networkx as nx
 from itertools import product
 from typing import NamedTuple
 from enum import Enum
+from math import log, ceil
 
 
 def find_exact_mccis(G1, G2, size_criterion):
@@ -19,8 +20,10 @@ def find_mccis(G1, G2, size_criterion, max_clique_finder):
     return(mccis_isomorphism)
 
 
-def find_approx_mccis(G1, G2, k):
+def find_approx_mccis(G1, G2):
     H = modular_product(G1, G2)
+    k = ceil(log(len(H.nodes), 2))
+
     visited = set()
     not_yet_visited = set(H.nodes)
     subgraphs = list()

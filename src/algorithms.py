@@ -3,34 +3,34 @@ from itertools import product
 from typing import NamedTuple
 
 
-def find_exact_mcis(G1, G2):
-    return(find_mcis(G1, G2, find_exact_max_clique))
+def find_exact_mccis(G1, G2):
+    return(find_mccis(G1, G2, find_exact_max_clique))
 
 
-def find_mcis(G1, G2, max_clique_finder):
+def find_mccis(G1, G2, max_clique_finder):
     H = modular_product(G1, G2)
-    mcis_isomorphism = max_clique_finder(H)
+    mccis_isomorphism = max_clique_finder(H)
 
-    return(mcis_isomorphism)
+    return(mccis_isomorphism)
 
 
 def find_exact_max_clique(graph):
-        max_clique = _max_clique_backtracking(graph,
-                                              Clique(tuple(), 0),
-                                              list(graph.nodes()),
-                                              Clique(tuple(), 0))
-        return max_clique
+    max_clique = _max_clique_backtracking(graph,
+                                          Clique(tuple(), 0),
+                                          list(graph.nodes()),
+                                          Clique(tuple(), 0))
+    return max_clique
 
 
 def _max_clique_backtracking(H, clique, candidates, max_clique):
     if(clique.size > max_clique.size):
-        max_clique = Clique(clique.clique, clique.size)
+        max_clique = Clique(clique.vertices, clique.size)
 
     nodes_to_test = candidates.copy()
     for v in nodes_to_test:
         extends_clique = True
         meet_A_type = False
-        for clique_vertex in clique.clique:
+        for clique_vertex in clique.vertices:
             if(not H.has_edge(v, clique_vertex)):
                 extends_clique = False
                 break
@@ -38,18 +38,16 @@ def _max_clique_backtracking(H, clique, candidates, max_clique):
             if(edge_type == 'A'):
                 meet_A_type = True
 
-        if(not extends_clique):
-            candidates.remove(v)
-            continue
-
         if(not meet_A_type and clique.size > 0):
             continue
 
         candidates.remove(v)
-        max_clique = _max_clique_backtracking(H,
-                                              expand_clique(clique, v, 1),
-                                              candidates.copy(),
-                                              max_clique)
+
+        if(extends_clique):
+            max_clique = _max_clique_backtracking(H,
+                                                  expand_clique(clique, v, 1),
+                                                  candidates.copy(),
+                                                  max_clique)
 
     return max_clique
 
@@ -76,10 +74,10 @@ def modular_product(G, H):
 
 
 def expand_clique(clique, vertex, size_difference):
-    return Clique(clique.clique + (vertex,),
+    return Clique(clique.vertices + (vertex,),
                   clique.size + size_difference)
 
 
 class Clique(NamedTuple):
-    clique: tuple
+    vertices: tuple
     size: int

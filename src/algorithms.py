@@ -81,12 +81,11 @@ def _max_clique_backtracking(H, clique, candidates, max_clique, size_criterion):
         extends_clique = True
         meet_A_type = False
         for clique_vertex in clique.vertices:
-            if not H.has_edge(candidate, clique_vertex):
+            edge = H.get_edge_data(candidate, clique_vertex)
+            if not edge:
                 extends_clique = False
                 break
-            edge_type = H.get_edge_data(
-                candidate, clique_vertex, 'type')['type']
-            if edge_type == 'A':
+            elif edge['type'] == 'A':
                 edge_size_increase += 1
                 meet_A_type = True
 

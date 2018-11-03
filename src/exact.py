@@ -1,33 +1,29 @@
 import sys
-import matplotlib.pyplot as plt
 import networkx as nx
+import numpy as np
+from itertools import product
 
 current_max = 0
 current_max_clique = list()
 
 
-def max_clique(clique, candidates):
+def max_clique(H, clique, candidates):
     global current_max
     global current_max_clique
     if(len(clique) > current_max):
         current_max = len(clique)
         current_max_clique = clique.copy()
 
-    if(len(candidates) == 0 or len(clique) == G.number_of_nodes()):
-        return
-
     nodes_to_test = candidates.copy()
-    while(len(nodes_to_test) > 0):
-        v = nodes_to_test.pop()
-
+    for v in nodes_to_test:
         extendsClique = True
         meetAType = False
         for cliqueV in clique:
-            if(not G.has_edge(v, cliqueV)):
+            if(not H.has_edge(v, cliqueV)):
                 extendsClique = False
                 break
             # print(str(v) + " " + str(cliqueV))
-            edgeType = G.get_edge_data(v, cliqueV, 'type')['type']
+            edgeType = H.get_edge_data(v, cliqueV, 'type')['type']
             if(edgeType == 'A'):
                 meetAType = True
 
@@ -40,33 +36,54 @@ def max_clique(clique, candidates):
 
         candidates.remove(v)
         clique.append(v)
-        max_clique(clique, candidates.copy())
+        max_clique(H, clique, candidates.copy())
         clique.remove(v)
 
 
-G = nx.Graph()
-edges = [
-    (0, 1, {'type': 'B'}),
-    (0, 2, {'type': 'A'}),
-    (0, 3, {'type': 'B'}),
-    (0, 4, {'type': 'A'}),
-    (1, 2, {'type': 'B'}),
-    (1, 3, {'type': 'B'}),
-    (2, 3, {'type': 'A'}),
-    (2, 4, {'type': 'B'})
-]
+def read_graph(filepath):
+    g_data = np.loadtxt(open(filepath, "rb"), delimiter=",")
+    return nx.from_numpy_matrix(g_data)
 
-G.add_edges_from(edges)
-# print(G.get_edge_data(2, 1, 'type')['type'])
-# edge_labels = nx.draw_networkx_edge_labels(G, pos=nx.spring_layout(G))
-# nx.draw_circular(G, with_labels=True)
-# plt.show()
 
-clique = nx.find_cliques(G)
-print(next(clique))
+def _node_product(G, H):
+    for u, v in product(G, H):
+        yield ((u, v), dict())
 
-max_clique(list(), list(G.nodes()))
+
+def modular_product(G, H):
+    GH = nx.Graph()
+    GH.add_nodes_from(_node_product(G, H))
+    for (x1, y1) in GH.nodes:
+        for (x2, y2) in GH.nodes:
+            if(x1 == x2 or y1 == y2):
+                continue
+
+            if(G.has_edge(x1, x2) and H.has_edge(y1, y2)):
+                GH.add_edge((x1, y1), (x2, y2), type='A')
+            elif(not G.has_edge(x1, x2) and not H.has_edge(y1, y2)):
+                GH.add_edge((x1, y1), (x2, y2), type='B')
+
+    return GH
+
+
+def print_isomorphism(clique):
+    G1_iso = list()
+    G2_iso = list()
+
+    for (x, y) in clique:
+        G1_iso.append(x)
+        G2_iso.append(y)
+
+    print(G1_iso)
+    print(G2_iso)
+
+
+G1 = read_graph("data/2a.csv")
+G2 = read_graph("data/2b.csv")
+
+H = modular_product(G1, G2)
+
+max_clique(H, list(), list(H.nodes()))
 print(current_max_clique)
 
-# nx.draw_circular(clique, with_labels=True)
-# plt.show()
+print_isomorphism(current_max_clique)

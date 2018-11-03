@@ -19,6 +19,49 @@ def find_mccis(G1, G2, size_criterion, max_clique_finder):
     return(mccis_isomorphism)
 
 
+def find_approx_mccis(G1, G2, k):
+    H = modular_product(G1, G2)
+    visited = set()
+    not_yet_visited = set(H.nodes)
+    subgraphs = list()
+
+    while (len(not_yet_visited) > 0):
+        now_visited = _bfs_(H, not_yet_visited.pop(), visited, k)
+        visited |= now_visited
+        not_yet_visited -= now_visited
+        if len(now_visited) > 0:
+            subgraphs.append(list(now_visited))
+
+    max_clique = Clique(tuple(), 0)
+    max_clique_size = 0
+    for subgraph in subgraphs:
+        clique = _max_clique_backtracking(H,
+                                          Clique(tuple(), 0),
+                                          subgraph,
+                                          Clique(tuple(), 0))
+        if(clique.size > max_clique_size):
+            max_clique = clique
+            max_clique_size = clique.size
+
+    return max_clique
+
+
+def _bfs_(G, start_vertex, visited, k):
+    queue = [start_vertex]
+    visited_now = set()
+    while queue:
+        vertex = queue.pop(0)
+        for neighbor, edge_attr in G.adj[vertex].items():
+            if edge_attr['type'] == 'A' and neighbor not in visited:
+                visited.add(neighbor)
+                visited_now.add(neighbor)
+                queue.append(neighbor)
+                if (len(visited_now) == k):
+                    return visited_now
+
+    return visited_now
+
+
 def find_exact_max_clique(graph, size_criterion):
     max_clique = _max_clique_backtracking(graph,
                                           Clique(tuple(), 0),
@@ -41,7 +84,8 @@ def _max_clique_backtracking(H, clique, candidates, max_clique, size_criterion):
             if not H.has_edge(candidate, clique_vertex):
                 extends_clique = False
                 break
-            edge_type = H.get_edge_data(candidate, clique_vertex, 'type')['type']
+            edge_type = H.get_edge_data(
+                candidate, clique_vertex, 'type')['type']
             if edge_type == 'A':
                 edge_size_increase += 1
                 meet_A_type = True
@@ -54,7 +98,8 @@ def _max_clique_backtracking(H, clique, candidates, max_clique, size_criterion):
         if extends_clique:
             max_clique = _max_clique_backtracking(
                 H,
-                expand_clique(clique, candidate, edge_size_increase, size_criterion),
+                expand_clique(clique, candidate,
+                              edge_size_increase, size_criterion),
                 candidates.copy(),
                 max_clique,
                 size_criterion

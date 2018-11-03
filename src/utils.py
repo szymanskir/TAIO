@@ -7,6 +7,13 @@ def read_graph(filepath):
     return nx.from_numpy_matrix(g_data)
 
 
+def save_mccis(filename, clique):
+    np.savetxt(filename,
+               np.transpose(np.asarray(clique)),
+               fmt='%i',
+               delimiter=',')
+
+
 def print_isomorphism(clique):
     G1_iso = list()
     G2_iso = list()

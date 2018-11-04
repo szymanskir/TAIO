@@ -1,8 +1,10 @@
 import networkx as nx
 import logging
 import matplotlib.pyplot as plt
+from random import sample
 
 from itertools import product, combinations
+from collections import deque
 from typing import NamedTuple
 from enum import Enum
 from math import log, ceil
@@ -54,23 +56,29 @@ def find_approx_max_clique(H, size_criterion):
     k = ceil(log(len(H.nodes), 2))
 
     visited = set()
-    not_yet_visited = set(H.nodes)
+    not_yet_visited = list(H.nodes)
     subgraphs = list()
 
     while (len(not_yet_visited) > 0):
-        now_visited = _bfs_(H, not_yet_visited.pop(), visited, k)
+        start = not_yet_visited[0]
+        now_visited = _bfs_(H, start, visited, k)
         visited |= now_visited
-        not_yet_visited -= now_visited
+
+        for v in now_visited:
+            not_yet_visited.remove(v)
+
         if len(now_visited) > 0:
             subgraphs.append(list(now_visited))
 
     max_clique = Clique()
     for subgraph in subgraphs:
+        print(subgraph)
         clique = _max_clique_backtracking(H,
                                           Clique(),
                                           subgraph,
                                           Clique(),
                                           size_criterion)
+        print(clique)
         if(clique.size > max_clique.size):
             max_clique = clique
 
@@ -78,10 +86,10 @@ def find_approx_max_clique(H, size_criterion):
 
 
 def _bfs_(G, start_vertex, visited, k):
-    queue = [start_vertex]
-    visited_now = set()
+    queue = deque([start_vertex])
+    visited_now = set([start_vertex])
     while queue:
-        vertex = queue.pop(0)
+        vertex = queue.popleft()
         for neighbor, edge_attr in G.adj[vertex].items():
             if edge_attr['type'] == 'A' and neighbor not in visited:
                 visited.add(neighbor)
@@ -186,7 +194,6 @@ def draw_results(G1, G2, clique):
 
     plt.subplot(222)
     g2_nodes = [g2_node for _, g2_node in list(clique.vertices)]
-    print(g2_nodes)
     draw_graph_with_induced_subgraph(G2, g2_nodes, 'G2')
 
     plt.subplot(223)

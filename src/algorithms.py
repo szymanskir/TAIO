@@ -5,23 +5,28 @@ from enum import Enum
 from math import log, ceil
 
 
-def find_exact_mccis(G1, G2, size_criterion):
-    return(find_mccis(G1, G2, size_criterion, find_exact_max_clique))
+def find_mccis_factory(exact):
+    if exact:
+        return create_find_mccis_function(find_exact_max_clique)
+    else:
+        return create_find_mccis_function(find_approx_max_clique)
 
 
-def find_mccis(G1, G2, size_criterion, max_clique_finder):
-    # validate criterion
-    if not hasattr(SizeCriterion, size_criterion):
-        raise ValueError(f'{size_criterion} is not a valid size criterion.')
+def create_find_mccis_function(max_clique_finder):
+    def find_mccis(G1, G2, size_criterion):
+        # validate criterion
+        if not hasattr(SizeCriterion, size_criterion):
+            raise ValueError(f'{size_criterion} is not a valid size criterion')
 
-    H = modular_product(G1, G2)
-    mccis_isomorphism = max_clique_finder(H, size_criterion)
+        H = modular_product(G1, G2)
+        mccis_isomorphism = max_clique_finder(H, size_criterion)
 
-    return(mccis_isomorphism)
+        return(mccis_isomorphism)
+
+    return find_mccis
 
 
-def find_approx_mccis(G1, G2):
-    H = modular_product(G1, G2)
+def find_approx_max_clique(H, size_criterion):
     k = ceil(log(len(H.nodes), 2))
 
     visited = set()
@@ -41,7 +46,8 @@ def find_approx_mccis(G1, G2):
         clique = _max_clique_backtracking(H,
                                           Clique(tuple(), 0),
                                           subgraph,
-                                          Clique(tuple(), 0))
+                                          Clique(tuple(), 0),
+                                          size_criterion)
         if(clique.size > max_clique_size):
             max_clique = clique
             max_clique_size = clique.size

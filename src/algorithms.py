@@ -2,7 +2,7 @@ import networkx as nx
 import logging
 import matplotlib.pyplot as plt
 
-from itertools import product
+from itertools import product, combinations
 from typing import NamedTuple
 from enum import Enum
 from math import log, ceil
@@ -179,37 +179,45 @@ class SizeCriterion(Enum):
 
 
 def draw_results(G1, G2, clique):
-    g1_nodes = [g1_node for g1_node, _ in list(clique.vertices)]
-    g2_nodes = [g2_node for _, g2_node in list(clique.vertices)]
 
     plt.subplot(221)
-    pos=nx.spring_layout(G1)
-    nx.draw_networkx(G1, pos, with_labels=True)
-    nx.draw_networkx_nodes(G1,
-                           pos,
-                           nodelist=g1_nodes,
-                           node_color='g',
-                           alpha=0.8)
-    plt.title('G1')
+    g1_nodes = [g1_node for g1_node, _ in list(clique.vertices)]
+    draw_graph_with_induced_subgraph(G1, g1_nodes, 'G1')
 
     plt.subplot(222)
-    pos=nx.spring_layout(G2)
-    nx.draw_networkx(G2, pos, with_labels=True)
-    nx.draw_networkx_nodes(G2,
-                           pos,
-                           nodelist=g2_nodes,
-                           node_color='g',
-                           alpha=0.8)
-    plt.title('G2')
+    g2_nodes = [g2_node for _, g2_node in list(clique.vertices)]
+    print(g2_nodes)
+    draw_graph_with_induced_subgraph(G2, g2_nodes, 'G2')
 
     plt.subplot(223)
     H = modular_product(G1, G2)
-    pos = nx.spring_layout(H)
-    nx.draw_networkx(H, pos, with_labels=True)
-    nx.draw_networkx_nodes(H,
-                           pos,
-                           nodelist=list(clique.vertices),
-                           node_color='g',
-                           alpha=0.8)
-    plt.title('Obtained result')
+    draw_graph_with_induced_subgraph(H, list(clique.vertices),
+                                     'Modular Product')
 
+
+def draw_graph_with_induced_subgraph(graph, nodes, plot_title):
+    pos = nx.spring_layout(graph)
+    induced_edges = find_induces_edges(graph, nodes)
+
+    nx.draw_networkx(graph, pos, with_labels=True)
+    nx.draw_networkx_nodes(graph,
+                           pos,
+                           nodelist=nodes,
+                           node_size=1200,
+                           node_color='skyblue')
+    nx.draw_networkx_edges(graph,
+                           pos,
+                           edgelist=induced_edges,
+                           edge_color='violet',
+                           width=5)
+    plt.title(plot_title)
+
+
+def find_induces_edges(graph, nodes):
+    induced_edges = list()
+    for x, y in combinations(nodes, 2):
+        edge = graph.get_edge_data(x, y)
+        if edge:
+            induced_edges.append((x, y))
+
+    return induced_edges

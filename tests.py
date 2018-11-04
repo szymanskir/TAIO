@@ -22,7 +22,7 @@ def assert_find_mccis(G1,
     directory = tmp_path / "sub"
     directory.mkdir()
     output_file = directory / "output.csv"
-    find_mccis(G1, G2, output_file, size_criterion, exact)
+    find_mccis(G1, G2, output_file, size_criterion, exact, False)
 
     assert_mccis_results(output_file, expected)
 

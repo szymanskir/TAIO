@@ -14,6 +14,7 @@ def save_mccis(filename, clique):
                delimiter=',')
 
 
+
 def print_isomorphism(clique):
     G1_iso = list()
     G2_iso = list()

@@ -1,5 +1,6 @@
 import networkx as nx
 import logging
+import matplotlib.pyplot as plt
 
 from itertools import product
 from typing import NamedTuple
@@ -9,7 +10,7 @@ from math import log, ceil
 from .utils import read_graph, save_mccis
 
 
-def find_mccis(graph_csv1, graph_csv2, output_file, size_criterion, exact):
+def find_mccis(graph_csv1, graph_csv2, output_file, size_criterion, exact, visualize):
     logger = logging.getLogger('main')
 
     logger.info(f'Reading data from {graph_csv1} and {graph_csv2}...')
@@ -22,6 +23,10 @@ def find_mccis(graph_csv1, graph_csv2, output_file, size_criterion, exact):
 
     logger.info(f'Saving results to {output_file}...')
     save_mccis(output_file, mccis.vertices)
+
+    if visualize:
+        draw_results(G1, G2, mccis)
+        plt.show()
 
 
 def find_mccis_factory(exact):
@@ -171,3 +176,40 @@ def expand_clique(clique, vertex, edge_increase, size_criterion):
 class SizeCriterion(Enum):
     Vertices = 1
     VerticesAndEdges = 2
+
+
+def draw_results(G1, G2, clique):
+    g1_nodes = [g1_node for g1_node, _ in list(clique.vertices)]
+    g2_nodes = [g2_node for _, g2_node in list(clique.vertices)]
+
+    plt.subplot(221)
+    pos=nx.spring_layout(G1)
+    nx.draw_networkx(G1, pos, with_labels=True)
+    nx.draw_networkx_nodes(G1,
+                           pos,
+                           nodelist=g1_nodes,
+                           node_color='g',
+                           alpha=0.8)
+    plt.title('G1')
+
+    plt.subplot(222)
+    pos=nx.spring_layout(G2)
+    nx.draw_networkx(G2, pos, with_labels=True)
+    nx.draw_networkx_nodes(G2,
+                           pos,
+                           nodelist=g2_nodes,
+                           node_color='g',
+                           alpha=0.8)
+    plt.title('G2')
+
+    plt.subplot(223)
+    H = modular_product(G1, G2)
+    pos = nx.spring_layout(H)
+    nx.draw_networkx(H, pos, with_labels=True)
+    nx.draw_networkx_nodes(H,
+                           pos,
+                           nodelist=list(clique.vertices),
+                           node_color='g',
+                           alpha=0.8)
+    plt.title('Obtained result')
+

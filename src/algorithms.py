@@ -59,17 +59,15 @@ def find_approx_max_clique(H, size_criterion):
         if len(now_visited) > 0:
             subgraphs.append(list(now_visited))
 
-    max_clique = Clique(tuple(), 0)
-    max_clique_size = 0
+    max_clique = Clique()
     for subgraph in subgraphs:
         clique = _max_clique_backtracking(H,
-                                          Clique(tuple(), 0),
+                                          Clique(),
                                           subgraph,
-                                          Clique(tuple(), 0),
+                                          Clique(),
                                           size_criterion)
-        if(clique.size > max_clique_size):
+        if(clique.size > max_clique.size):
             max_clique = clique
-            max_clique_size = clique.size
 
     return max_clique
 
@@ -92,16 +90,16 @@ def _bfs_(G, start_vertex, visited, k):
 
 def find_exact_max_clique(graph, size_criterion):
     max_clique = _max_clique_backtracking(graph,
-                                          Clique(tuple(), 0),
+                                          Clique(),
                                           list(graph.nodes()),
-                                          Clique(tuple(), 0),
+                                          Clique(),
                                           size_criterion)
     return max_clique
 
 
 def _max_clique_backtracking(H, clique, candidates, max_clique, size_criterion):
     if(clique.size > max_clique.size):
-        max_clique = Clique(clique.vertices, clique.size)
+        max_clique = clique
 
     nodes_to_test = candidates.copy()
     for candidate in nodes_to_test:
@@ -157,8 +155,8 @@ def modular_product(G, H):
 
 
 class Clique(NamedTuple):
-    vertices: tuple
-    size: int
+    vertices: tuple = tuple()
+    size: int = 0
 
 
 def expand_clique(clique, vertex, edge_increase, size_criterion):

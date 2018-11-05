@@ -32,3 +32,24 @@ def assert_find_mccis(G1,
 ])
 def test_exact_vertices_mccis(G1, G2, tmp_path, expected):
     assert_find_mccis(G1, G2, tmp_path, 'Vertices', True, expected)
+
+
+@pytest.mark.parametrize("G1, G2, expected", [
+    ('data/2a.csv', 'data/2b.csv', 'data/2-correct.csv')
+])
+def test_approx_vertices_mccis(G1, G2, tmp_path, expected):
+    assert_find_mccis(G1, G2, tmp_path, 'Vertices', False, expected)
+
+
+@pytest.mark.parametrize("G1, G2, expected", [
+    ('data/2a.csv', 'data/2b.csv', 'data/2-correct.csv')
+])
+def test_exact_vertices_and_edges_mccis(G1, G2, tmp_path, expected):
+    assert_find_mccis(G1, G2, tmp_path, 'VerticesAndEdges', True, expected)
+
+
+@pytest.mark.parametrize("G1, G2, expected", [
+    ('data/2a.csv', 'data/2b.csv', 'data/2-correct.csv')
+])
+def test_approx_vertices_and_edges_mccis(G1, G2, tmp_path, expected):
+    assert_find_mccis(G1, G2, tmp_path, 'VerticesAndEdges', False, expected)

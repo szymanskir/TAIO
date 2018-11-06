@@ -4,7 +4,23 @@ import matplotlib.pyplot as plt
 from itertools import combinations
 
 
-def draw_graph_with_induced_subgraph(graph, nodes=list(), plot_title=None):
+def draw_results(G1, G2, H, clique):
+    """Draws the input graphs and their modular product with the
+    found clique and common subgraphs highlighted.
+    """
+    g1_nodes = [g1_node for g1_node, _ in list(clique.vertices)]
+    draw_graph_with_induced_subgraph(G1, g1_nodes, 'G1')
+
+    g2_nodes = [g2_node for _, g2_node in list(clique.vertices)]
+    draw_graph_with_induced_subgraph(G2, g2_nodes, 'G2')
+
+    draw_graph_with_induced_subgraph(H, list(clique.vertices),
+                                     'Modular Product')
+
+
+def draw_graph_with_induced_subgraph(graph, nodes=None, plot_title=None):
+    """Draws a single graph with the induced subgraph highlighted."""
+    nodes = nodes if nodes else list()
     fig = plt.figure()
     pos = nx.spring_layout(graph)
     induced_edges = find_induces_edges(graph, nodes)
@@ -25,12 +41,19 @@ def draw_graph_with_induced_subgraph(graph, nodes=list(), plot_title=None):
     return fig
 
 
-def save_graph_plot(graph, output_file, nodes=list(), plot_title=None):
-    fig = draw_graph_with_induced_subgraph(graph)
+def save_graph_plot(graph, output_file, nodes=None, plot_title=None):
+    """Saves the drawn plot graph."""
+    fig = draw_graph_with_induced_subgraph(graph, nodes, plot_title)
     fig.savefig(output_file, format='pdf')
 
 
 def find_induces_edges(graph, nodes):
+    """Find all edges connecting the given nodes in the given graph.
+
+    Returns
+    ----------
+    List of edges connecting the given nodes.
+    """
     induced_edges = list()
     for x, y in combinations(nodes, 2):
         edge = graph.get_edge_data(x, y)

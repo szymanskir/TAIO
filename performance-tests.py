@@ -1,4 +1,5 @@
 import functools
+import json
 import logging
 import networkx as nx
 import timeit
@@ -37,7 +38,7 @@ class ParametrizedTestCase(TestCase, NamedTuple):
 def measure_single_test_case(G1, G2, size_criterion, fun: Callable):
     logging.info('Measuring test case...')
     timer = timeit.Timer(functools.partial(fun, G1, G2, size_criterion))
-    return timer.timeit(1)
+    return round(timer.timeit(1), 3)
 
 
 def measure_test_cases(test_cases: List[TestCase],
@@ -48,33 +49,34 @@ def measure_test_cases(test_cases: List[TestCase],
             for G1, G2 in graph_test_cases]
 
 
-def create_test_cases():
-    logging.info('Preparing test cases...')
-    sizes = [5, 6, 7]
-    graph_types = ['path', 'complete', 'random']
-    density = 0.8
-    
-    test_cases = list()
-    for size in sizes:
-        for x, y in combinations_with_replacement(graph_types, 2):
-           test_cases.append(ParametrizedTestCase(
-               size,
-               density,
-               x,
-               size,
-               density,
-               y
-           )) 
+def prepare_test_cases(graph_type1, graph_type2, sizes, density=None):
+    logging.info(f'Preparing test cases for ({graph_type1}, {graph_type2})...')
+    test_cases = [ParametrizedTestCase(size, density, graph_type1, size, density, graph_type2)
+                  for size in sizes]
 
     return test_cases
+
+if __name__ == '__main__':
+    random.seed(1)
+    logging.basicConfig(level=logging.INFO)
+
+    sizes = [x for x in range(5, 6)]
+    graph_types = {'path', 'complete', 'random', 'tree', 'cycle'}
+    graph_type_pairs = combinations_with_replacement(graph_types, 2)
+    density = 0.8
+
+    test_cases = {str(pair): prepare_test_cases(*pair, sizes, density)
+                  for pair in graph_type_pairs}
+
+    find_mccis_exact = find_mccis_factory(exact=True)
+    find_mccis_approx = find_mccis_factory(exact=True)
+
+    logging.info('Starting performance tests...')
+    results = {pair: dict(zip(sizes, measure_test_cases(test_cases[pair],
+                                                        find_mccis_exact,
+                                                        'Vertices')))
+               for pair in test_cases}
+    logging.info(f'Obtained result:\n {json.dumps(results, indent=4)}')
     
-
-random.seed(1)
-logging.basicConfig(level=logging.INFO)
-
-test_cases = create_test_cases()
-
-find_mccis_exact = find_mccis_factory(exact=True)
-find_mccis_approx = find_mccis_factory(exact=True)
-
-print(measure_test_cases(test_cases, find_mccis_exact, 'Vertices'))
+    with open('simulation_results.json', 'w') as outfile:
+        json.dump(results, outfile, indent=4)

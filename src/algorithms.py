@@ -127,7 +127,8 @@ def find_approx_max_clique(H, size_criterion):
 
     max_clique = Clique()
     for subgraph in subgraphs:
-        clique = find_exact_max_clique(H.subgraph(subgraph), size_criterion)
+        clique = _max_clique_backtracking(H, subgraph,
+                                          Clique([], 0), size_criterion)
         if(clique.size > max_clique.size):
             max_clique = clique
 
@@ -170,6 +171,70 @@ def _bfs_(G, start_vertex, visited, k):
     return visited_now
 
 
+def _max_clique_backtracking(H, clique, candidates, max_clique, size_criterion):
+    """ Max clique backtracking function.
+
+    Parameters
+    ----------
+    H : networkx graph
+        Graph in which the maximal clique is sought.
+
+    clique : list of vertices
+        The current clique being considered.
+
+    candidates : list of vertices
+        Vertices that are considered to be added to the clique.
+
+    max_clique : list of vertices
+        The biggest clique found until now.
+
+    size_criterion: SizeCriterion value
+        The considered size criterion:
+            * highest amount of vertices
+            * highest amount of vertices and edges
+
+
+    Returns
+    ----------
+    Maximal clique found.
+    """
+    if(clique.size > max_clique.size):
+        max_clique = clique
+
+    nodes_to_test = candidates.copy()
+    for candidate in nodes_to_test:
+        edge_size_increase = 0
+        extends_clique = True
+        meet_A_type = False
+        for clique_vertex in clique.vertices:
+            edge = H.get_edge_data(candidate, clique_vertex)
+            if not edge:
+                extends_clique = False
+                break
+            elif edge['type'] == 'A':
+                edge_size_increase += 1
+                meet_A_type = True
+
+        if not meet_A_type and clique.size > 0:
+            continue
+
+        candidates.remove(candidate)
+
+        if extends_clique:
+            max_clique = _max_clique_backtracking(
+                H,
+                expand_clique(clique,
+                              candidate,
+                              edge_size_increase,
+                              size_criterion),
+                candidates.copy(),
+                max_clique,
+                size_criterion
+            )
+
+    return max_clique
+
+
 def find_exact_max_clique(graph, size_criterion):
     """Finds the exact maximal clique in the graph
 
@@ -184,68 +249,6 @@ def find_exact_max_clique(graph, size_criterion):
             * highest amount of vertices
             * highest amount of vertices and edges
     """
-    def _max_clique_backtracking(H, clique, candidates, max_clique, size_criterion):
-        """ Max clique backtracking function.
-
-        Parameters
-        ----------
-        H : networkx graph
-            Graph in which the maximal clique is sought.
-
-        clique : list of vertices
-            The current clique being considered.
-
-        candidates : list of vertices
-            Vertices that are considered to be added to the clique.
-
-        max_clique : list of vertices
-            The biggest clique found until now.
-
-        size_criterion: SizeCriterion value
-            The considered size criterion:
-                * highest amount of vertices
-                * highest amount of vertices and edges
-
-
-        Returns
-        ----------
-        Maximal clique found.
-        """
-        if(clique.size > max_clique.size):
-            max_clique = clique
-
-        nodes_to_test = candidates.copy()
-        for candidate in nodes_to_test:
-            edge_size_increase = 0
-            extends_clique = True
-            meet_A_type = False
-            for clique_vertex in clique.vertices:
-                edge = H.get_edge_data(candidate, clique_vertex)
-                if not edge:
-                    extends_clique = False
-                    break
-                elif edge['type'] == 'A':
-                    edge_size_increase += 1
-                    meet_A_type = True
-
-            if not meet_A_type and clique.size > 0:
-                continue
-
-            candidates.remove(candidate)
-
-            if extends_clique:
-                max_clique = _max_clique_backtracking(
-                    H,
-                    expand_clique(clique,
-                                  candidate,
-                                  edge_size_increase,
-                                  size_criterion),
-                    candidates.copy(),
-                    max_clique,
-                    size_criterion
-                )
-
-        return max_clique
 
     max_clique = _max_clique_backtracking(graph,
                                           Clique(),

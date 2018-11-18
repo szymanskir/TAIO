@@ -1,4 +1,5 @@
-src/.vscode/settings.json
+.vscode/
+src/.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

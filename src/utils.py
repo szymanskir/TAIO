@@ -13,7 +13,7 @@ def save_graph(graph, output_file):
 
 
     filename : filepath
-        Path to file contaning in which the adjacency matrix will
+        Path to file where the adjacency matrix will
         be saved.
     """
     n = graph.number_of_nodes()
@@ -30,12 +30,12 @@ def save_graph(graph, output_file):
 
 
 def read_graph(filepath):
-    """Creates a graph based on the content filepath.
+    """Creates a graph based on the content of the file at given filepath.
 
     Parameters
     ----------
     filename : filepath
-        Path to file contaning an adjacency matrix.
+        Path to a file containing an adjacency matrix.
     """
     g_data = np.loadtxt(open(filepath, "rb"), delimiter=",")
     return nx.from_numpy_matrix(g_data)
@@ -47,7 +47,7 @@ def save_mccis(filename, clique):
     Parameters
     ----------
     filename : filepath
-        Path to file in which the clique data should be saved
+        Path to file where the clique data should be saved
 
     clique : list of vertices.
         Clique result given by a clique finding algorithm

@@ -13,8 +13,8 @@ from .visualization import draw_results
 
 
 def find_mccis(graph_csv1, graph_csv2, output_file, size_criterion, exact, visualize):
-    """Finds the maximal common connected subgraph of two graphs describes by
-    seperate csv files containg the adjacency matrices.
+    """Finds the maximal common connected subgraph of two graphs described by
+    separate csv files containing corresponding adjacency matrices.
 
     Parameters
     ----------
@@ -25,7 +25,7 @@ def find_mccis(graph_csv1, graph_csv2, output_file, size_criterion, exact, visua
         Path to the file in which the result should be saved.
 
     size_criterion : SizeCriterion value
-        The considered size critetion:
+        The considered size criterion:
             * highest amount of vertices
             * highest amount of vertices and edges
 
@@ -100,7 +100,7 @@ def find_approx_max_clique(H, size_criterion):
         Graph in which the maximal clique will be sought.
 
     size_criterion: SizeCriterion value
-        The considered size critetion:
+        The considered size criterion:
             * highest amount of vertices
             * highest amount of vertices and edges
 
@@ -140,10 +140,10 @@ def _bfs_(G, start_vertex, visited, k):
     Parameters
     ----------
     G : networkx graph
-        Graph in which bfs will be performed.
+        Graph in which BFS will be performed.
 
     start_vertex : int
-        Vertex from which the bfs will start.
+        Vertex from which the BFS will start.
 
     visited : list of int
         List of already visited vertices.
@@ -153,7 +153,7 @@ def _bfs_(G, start_vertex, visited, k):
 
     Returns
     ---------
-    List of nodes visited during the bfs.
+    List of nodes visited during the BFS.
     """
     queue = deque([start_vertex])
     visited_now = set([start_vertex])
@@ -180,7 +180,7 @@ def find_exact_max_clique(graph, size_criterion):
         Graph in which the maximal clique will be found.
 
     size_criterion: SizeCriterion value
-        The considered size critetion:
+        The considered size criterion:
             * highest amount of vertices
             * highest amount of vertices and edges
     """
@@ -202,7 +202,7 @@ def find_exact_max_clique(graph, size_criterion):
             The biggest clique found until now.
 
         size_criterion: SizeCriterion value
-            The considered size critetion:
+            The considered size criterion:
                 * highest amount of vertices
                 * highest amount of vertices and edges
 
@@ -255,10 +255,9 @@ def find_exact_max_clique(graph, size_criterion):
     return max_clique
 
 
-
 def _node_product(G, H):
-    """Calculates the node cartesian product of G and H.
-    """ 
+    """Calculates the node Cartesian product of G and H.
+    """
     for u, candidate in product(G, H):
         yield ((u, candidate), dict())
 
@@ -285,7 +284,7 @@ def modular_product(G, H):
 
 
 def expand_clique(clique, vertex, edge_increase, size_criterion):
-    """Updates the clique vertices and size according."""
+    """Updates the clique vertices and size accordingly."""
     if SizeCriterion[size_criterion] == SizeCriterion.Vertices:
         return Clique(clique.vertices + (vertex,),
                       clique.size + 1)
@@ -301,6 +300,6 @@ class Clique(NamedTuple):
 
 
 class SizeCriterion(Enum):
-    """Class representing size measure critetions."""
+    """Class representing size measure criteria."""
     Vertices = 1
     VerticesAndEdges = 2

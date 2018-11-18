@@ -127,7 +127,7 @@ def find_approx_max_clique(H, size_criterion):
 
     max_clique = Clique()
     for subgraph in subgraphs:
-        clique = find_exact_max_clique(H, size_criterion)
+        clique = find_exact_max_clique(H.subgraph(subgraph), size_criterion)
         if(clique.size > max_clique.size):
             max_clique = clique
 

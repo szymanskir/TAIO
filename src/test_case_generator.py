@@ -4,7 +4,7 @@ import logging
 from math import ceil, floor
 
 
-def generate_test_case(graph_type, vertex_number, edge_probability):
+def generate_test_case(graph_type, vertex_number, edge_probability=None):
     """Generates a graph with vertex_number vertices
     of the given type.
     """
@@ -22,7 +22,6 @@ def generate_test_case(graph_type, vertex_number, edge_probability):
         result = graph_generator(vertex_number)
 
     return result
-
 
 def _graph_generator_factory(graph_type):
     graph_generators = {

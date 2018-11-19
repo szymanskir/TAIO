@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from itertools import product
 from collections import deque
 from typing import NamedTuple
+
+
 from enum import Enum
 from math import log, ceil
 
@@ -127,8 +129,11 @@ def find_approx_max_clique(H, size_criterion):
 
     max_clique = Clique()
     for subgraph in subgraphs:
-        clique = _max_clique_backtracking(H, subgraph,
-                                          Clique([], 0), size_criterion)
+        clique = _max_clique_backtracking(H,
+                                          Clique(),
+                                          subgraph,
+                                          Clique(),
+                                          size_criterion)
         if(clique.size > max_clique.size):
             max_clique = clique
 

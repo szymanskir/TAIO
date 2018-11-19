@@ -1,6 +1,7 @@
 import functools
 import json
 import logging
+import numpy as np
 import os
 import pandas as pd
 import timeit
@@ -54,23 +55,33 @@ def measure_test_cases(test_cases,
 
 def exact_algorithm_complexity_estimation():
     fixed_vertex_number = 8
-    vertex_range = range(1, 3)
+    vertex_range = range(1, 15)
+    benchmark_count = 15
 
     sizes = [(fixed_vertex_number, x) for x in vertex_range]
 
     test_cases_parameters = [ParametrizedTestCase(size_pair[0], 0.5, 'random',
                                                   size_pair[1], 0.5, 'random')
                              for size_pair in sizes] 
-    test_cases = [test_case_params.get_test_case()
-                  for test_case_params in test_cases_parameters]
 
-    exact_algorithm = find_mccis_factory(True)
-    measurements_vertices = measure_test_cases(test_cases,
-                                               exact_algorithm,
-                                               'Vertices')
-    measurements_vertices_and_edges = measure_test_cases(test_cases,
-                                                         exact_algorithm,
-                                                         'VerticesAndEdges')
+    measurements_vertices = []
+    measurements_vertices_and_edges = []
+
+    for k in range(0, benchmark_count):
+        test_cases = [test_case_params.get_test_case()
+                    for test_case_params in test_cases_parameters]
+
+        exact_algorithm = find_mccis_factory(True)
+        measurements_vertices.append(measure_test_cases(test_cases,
+                                                exact_algorithm,
+                                                'Vertices'))
+        measurements_vertices_and_edges.append(measure_test_cases(test_cases,
+                                                            exact_algorithm,
+                                                            'VerticesAndEdges'))
+
+    measurements_vertices = np.round(np.mean(np.array(measurements_vertices), axis=0), 3) 
+    measurements_vertices_and_edges = np.round(np.mean(np.array(measurements_vertices_and_edges), axis=0), 3)
+
     vertex_criterium_df = pd.DataFrame({
         'czas obliczeń': measurements_vertices,
         '|V2|': vertex_range
@@ -117,7 +128,7 @@ def test_graph_pairing(graph_pair, size_range):
     })
 
     vertex_criterium_df.to_csv(f'results/{graph_pair[0]}-{graph_pair[1]}-vertex.csv')
-    vertex_and_edges_criterium_df.to_csv('results/{graph_pair[0]}-{graph_pair[1]}-vertex-and-edges-complexity-estimation.csv')
+    vertex_and_edges_criterium_df.to_csv(f'results/{graph_pair[0]}-{graph_pair[1]}-vertex-and-edges-complexity-estimation.csv')
 
 
 def graph_type_factors():
@@ -161,10 +172,58 @@ def density_factor():
     vertex_and_edges_criterium_df.to_csv('results/exact-vertex-and-edges-density-factor.csv')
 
 
+def approx_algorithm_complexity_estimation():
+    fixed_vertex_number = 8
+    vertex_range = range(1, 5)
+    benchmark_count = 15
+
+    sizes = [(fixed_vertex_number, x) for x in vertex_range]
+
+    test_cases_parameters = [ParametrizedTestCase(size_pair[0], 0.5, 'random',
+                                                  size_pair[1], 0.5, 'random')
+                             for size_pair in sizes] 
+
+    measurements_vertices = []
+    measurements_vertices_and_edges = []
+
+    for k in range(0, benchmark_count):
+        test_cases = [test_case_params.get_test_case()
+                    for test_case_params in test_cases_parameters]
+
+        exact_algorithm = find_mccis_factory(False)
+        measurements_vertices.append(measure_test_cases(test_cases,
+                                                exact_algorithm,
+                                                'Vertices'))
+        measurements_vertices_and_edges.append(measure_test_cases(test_cases,
+                                                            exact_algorithm,
+                                                            'VerticesAndEdges'))
+
+    measurements_vertices = np.round(np.mean(np.array(measurements_vertices), axis=0), 3) 
+    measurements_vertices_and_edges = np.round(np.mean(np.array(measurements_vertices_and_edges), axis=0), 3)
+
+    vertex_criterium_df = pd.DataFrame({
+        'czas obliczeń': measurements_vertices,
+        '|V2|': vertex_range
+    })
+    vertex_criterium_df.loc[:, '|V1|']=fixed_vertex_number
+
+
+    vertex_and_edges_criterium_df = pd.DataFrame({
+        'czas obliczeń': measurements_vertices,
+        '|V2|': vertex_range
+    })
+    vertex_and_edges_criterium_df.loc[:, '|V1|']=fixed_vertex_number
+
+    vertex_criterium_df.to_csv('results/approx-vertex-complexity-estimation.csv')
+    vertex_and_edges_criterium_df.to_csv('results/approx-vertex-and-edges-complexity-estimation.csv')
+
+
+
 if __name__ == '__main__':
     random.seed(1)
     logging.basicConfig(level=logging.INFO)
 
-    exact_algorithm_complexity_estimation()
-    graph_type_factors()
-    density_factor()
+    #exact_algorithm_complexity_estimation()
+    #graph_type_factors()
+    #density_factor()
+    approx_algorithm_complexity_estimation()

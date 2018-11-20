@@ -52,7 +52,8 @@ def save_mccis(filename, clique):
     clique : list of vertices.
         Clique result given by a clique finding algorithm
     """
-    np.savetxt(filename,
-               np.transpose(np.asarray(clique)),
-               fmt='%i',
-               delimiter=',')
+    with open(filename, 'wb+') as f:
+        np.savetxt(f,
+                   np.transpose(np.asarray(clique)),
+                   fmt='%i',
+                   delimiter=',')

@@ -56,7 +56,7 @@ def measure_test_cases(test_cases,
 def exact_algorithm_complexity_estimation():
     fixed_vertex_number = 8
     vertex_range = range(1, 15)
-    benchmark_count = 15
+    benchmark_count = 10
 
     sizes = [(fixed_vertex_number, x) for x in vertex_range]
 
@@ -90,7 +90,7 @@ def exact_algorithm_complexity_estimation():
 
 
     vertex_and_edges_criterium_df = pd.DataFrame({
-        'czas obliczeń': measurements_vertices,
+        'czas obliczeń': measurements_vertices_and_edges,
         '|V2|': vertex_range
     })
     vertex_and_edges_criterium_df.loc[:, '|V1|']=fixed_vertex_number
@@ -123,7 +123,7 @@ def test_graph_pairing(graph_pair, size_range):
 
 
     vertex_and_edges_criterium_df = pd.DataFrame({
-        'czas obliczeń': measurements_vertices,
+        'czas obliczeń': measurements_vertices_and_edges,
         'sizes': size_range 
     })
 
@@ -134,7 +134,7 @@ def test_graph_pairing(graph_pair, size_range):
 def graph_type_factors():
     graph_types = {'path', 'tree', 'cycle', 'complete', 'bipartite'}
     graph_type_pairs = combinations_with_replacement(graph_types, 2)
-    size_range = range(5, 6)
+    size_range = range(1, 9)
 
     [test_graph_pairing(pair, size_range)
      for pair in graph_type_pairs]
@@ -142,7 +142,7 @@ def graph_type_factors():
 
 def density_factor():
     density_range = [x/10 for x in range(1, 10, 1)]
-    fixed_size = 7
+    fixed_size = 8
     test_cases_parameters = [ParametrizedTestCase(fixed_size, density, 'random',
                                                   fixed_size, density, 'random')
                              for density in density_range] 
@@ -164,7 +164,7 @@ def density_factor():
 
 
     vertex_and_edges_criterium_df = pd.DataFrame({
-        'czas obliczeń': measurements_vertices,
+        'czas obliczeń': measurements_vertices_and_edges,
         'gęstość': density_range
     })
 
@@ -173,8 +173,8 @@ def density_factor():
 
 
 def approx_algorithm_complexity_estimation():
-    fixed_vertex_number = 8
-    vertex_range = range(1, 5)
+    fixed_vertex_number = 20
+    vertex_range = range(1, 51)
     benchmark_count = 15
 
     sizes = [(fixed_vertex_number, x) for x in vertex_range]
@@ -209,7 +209,7 @@ def approx_algorithm_complexity_estimation():
 
 
     vertex_and_edges_criterium_df = pd.DataFrame({
-        'czas obliczeń': measurements_vertices,
+        'czas obliczeń': measurements_vertices_and_edges,
         '|V2|': vertex_range
     })
     vertex_and_edges_criterium_df.loc[:, '|V1|']=fixed_vertex_number
@@ -223,7 +223,7 @@ if __name__ == '__main__':
     random.seed(1)
     logging.basicConfig(level=logging.INFO)
 
-    #exact_algorithm_complexity_estimation()
-    #graph_type_factors()
-    #density_factor()
+    exact_algorithm_complexity_estimation()
+    graph_type_factors()
+    density_factor()
     approx_algorithm_complexity_estimation()
